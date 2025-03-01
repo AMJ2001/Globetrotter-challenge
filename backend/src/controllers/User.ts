@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { UserModel } from "../models/User";
+import { v4 as uuidv4 } from 'uuid';
+import { InviteModel } from "../models/Invitations";
 
 export const registerUser = async (req: Request, res: Response) => {
   try {
@@ -49,17 +51,49 @@ export const loginUser = async (req: Request, res: Response) => {
 export const inviteUser = async (req: Request, res: Response) => {
   try {
     const inviterId = req.body.inviterId as string;
+    const image = req.body.image as string;
 
     const inviter = await UserModel.findById(inviterId);
     if (!inviter) {
       res.status(404).json({ message: "Inviter not found" });
     } else {
-      const inviteToken = jwt.sign({ inviterId, inviterName: inviter.name, inviterScore: inviter.highestScore }, process.env.JWT_SECRET as string, { expiresIn: "1h" });
-      const inviteLink = `${process.env.FRONTEND_URL}/invite?token=${inviteToken}`;
-      res.json({ message: "Invite generated", inviteLink });
+      // Image can be saved to a cloud service
+      const imageUrl = image;
+
+      const inviteCode = uuidv4();
+      await InviteModel.create({ inviteCode, inviterId, inviterName: inviter.name, inviterScore: inviter.highestScore, imageUrl });
+      
+      const inviteLink = `${process.env.FRONTEND_URL}/invite?code=${inviteCode}`;
+      res.json({ message: "Invite generated", inviteLink, imageUrl });
     }
   } catch (error) {
     console.error("Error generating invite:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const getInviterProfile = async (req: Request, res: Response) => {
+  try {
+    const inviteCode = req.query.code as string;
+
+    if (!inviteCode) {
+      res.status(400).json({ message: "Invite code is required" });
+    }
+
+    const invite = await InviteModel.findOne({ inviteCode });
+    if (!invite) {
+      res.status(404).json({ message: "Invite not found" });
+    } else {
+      const inviter = await UserModel.findById(invite.inviterId);
+      if (!inviter) {
+        res.status(404).json({ message: "Inviter not found" });
+      } else {
+        res.json({ name: invite.inviterName, favourite: inviter.favourite, score: invite.inviterScore, imageUrl: invite.imageUrl });
+      }
+    }
+  } catch (error) {
+    console.error("Error retrieving inviter profile:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
