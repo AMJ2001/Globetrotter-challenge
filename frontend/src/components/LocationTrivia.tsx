@@ -17,7 +17,7 @@ const LocationTrivia: React.FC = () => {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [extraClue, setExtraClue] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
-  const [score, setScore] = useState<number>(0);
+  const [{ correct, incorrect }, setScore] = useState<Record<string, number>>({ correct: 0, incorrect: 0 });
   const [options, setOptions] = useState<string[]>([]);
   const [showTrivia, setShowTrivia] = useState<boolean>(false);
   const [showClue, setShowClue] = useState(false);
@@ -59,10 +59,12 @@ const LocationTrivia: React.FC = () => {
   };
 
   const handleAnswer = (answer: string) => {
-    if (!currentDestination) return;
+    if (!currentDestination) { return };
     const correct = answer === currentDestination.city;
     setIsCorrect(correct);
-    if (correct) setScore(prev => prev + 1);
+    correct
+    ? setScore(prev => { return { correct:  prev.correct + 1, incorrect: prev.incorrect } })
+    : setScore(prev => { return { incorrect:  prev.incorrect + 1, correct: prev.correct } });
   };
 
   return (
@@ -125,14 +127,19 @@ const LocationTrivia: React.FC = () => {
                   <p>Trivia: {currentDestination.trivia[0]}</p>
                   <button onClick={() => loadNewQuestion()}
                     className="mt-4 px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-lg font-semibold">
-                    Try Again
+                    Play Again
                   </button>
                 </div>
               )}
             </motion.div>
           )}
 
-          <p className="mt-6 text-lg font-semibold">Score: {score}</p>
+          <motion.div 
+            className="mt-6 p-4 rounded-lg bg-gray-800 text-white text-lg font-semibold shadow-lg border border-gray-600"
+            initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
+            <p className="text-green-400">✅ Score: {correct}</p>
+            <p className="text-red-400">❌ Incorrect: {incorrect}</p>
+          </motion.div>
         </>
       ) : (
         <p className="text-lg">Loading question...</p>
