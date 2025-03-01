@@ -10,7 +10,7 @@ const InviteProfile: React.FC = () => {
     const params = new URLSearchParams(location.search);
 
     if (window.location.pathname === "/invite") {
-      fetch(`http://localhost:5000/api/profile/?code=${params.get("code")}`)
+      fetch(`https://globetrotter-challenge-production-c574.up.railway.app/api/profile/?code=${params.get("code")}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.error)  { throw new Error(data.error); }

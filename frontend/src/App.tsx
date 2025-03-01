@@ -33,7 +33,7 @@ function App() {
     const imageData = canvas.toDataURL('image/png');
 
     try {
-      const response = await fetch('http://localhost:5000/api/invite', {
+      const response = await fetch('https://globetrotter-challenge-production-c574.up.railway.app/api/invite', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -41,8 +41,13 @@ function App() {
         },
         body: JSON.stringify({ inviterId: user?.id || decodedData?.id, image: imageData }),
       });
-
+      
       const data = await response.json();
+      if(data.message.includes('Inviter not found')) {
+        window.location.href = '/user';
+        return;
+      }
+      
       if (data.inviteLink) {
         setInviteLink(data.inviteLink);
         setImageUrl(data.imageUrl);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Confetti from "react-confetti";
 import { motion } from "framer-motion";
 
@@ -22,19 +22,13 @@ const LocationTrivia: React.FC = () => {
   const [showTrivia, setShowTrivia] = useState<boolean>(false);
   const [showClue, setShowClue] = useState(false);
 
-  useEffect(() => {
-    fetch("http://localhost:5000/api/destinations", { 
-      mode: 'cors',
-      headers: { 'Access-Control-Allow-Origin':'*' }
-    }).then((res) => res.json())
-      .then((data) => {
-        setDestinations(data);
-        loadNewQuestion(data, []);
-      })
-      .catch((err) => console.error("Error fetching destinations:", err));
-  }, []);
+  const generateOptions = (correctDestination: Destination, data: Destination[]) => {
+    const otherCities = data.map(dest => dest.city).filter(city => city !== correctDestination.city);
+    const randomOptions = [...otherCities.sort(() => 0.5 - Math.random()).slice(0, 2), correctDestination.city].sort(() => Math.random() - 0.5);
+    setOptions(randomOptions);
+  };
 
-  const loadNewQuestion = (data: Destination[] = destinations, used: Destination[] = usedDestinations) => {
+  const loadNewQuestion = useCallback((data: Destination[], used: Destination[]) => {
     if (used.length === data.length) {
       setUsedDestinations([]);
       used = [];
@@ -50,22 +44,34 @@ const LocationTrivia: React.FC = () => {
     setShowTrivia(false);
     setShowClue(false);
     generateOptions(randomDestination, data);
-  };
+  }, []);
 
-  const generateOptions = (correctDestination: Destination, data: Destination[]) => {
-    const otherCities = data.map(dest => dest.city).filter(city => city !== correctDestination.city);
-    const randomOptions = [...otherCities.sort(() => 0.5 - Math.random()).slice(0, 2), correctDestination.city].sort(() => Math.random() - 0.5);
-    setOptions(randomOptions);
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("https://globetrotter-challenge-production-c574.up.railway.app/api/destinations", { 
+          mode: 'cors',
+          headers: { 'Access-Control-Allow-Origin':'*' }
+        });
+        const data = await res.json();
+        setDestinations(data);
+        loadNewQuestion(data, []);
+      } catch (err) {
+        console.error("Error fetching destinations:", err);
+      }
+    };
+
+    fetchData();
+  }, [loadNewQuestion]);
 
   const handleAnswer = (answer: string) => {
-    if (!currentDestination) { return };
+    if (!currentDestination) return;
     const correct = answer === currentDestination.city;
     setIsCorrect(correct);
     correct
-    ? setScore(prev => { return { correct:  prev.correct + 1, incorrect: prev.incorrect } })
-    : setScore(prev => { return { incorrect:  prev.incorrect + 1, correct: prev.correct } });
-  };
+      ? setScore(prev => ({ correct:  prev.correct + 1, incorrect: prev.incorrect }))
+      : setScore(prev => ({ incorrect:  prev.incorrect + 1, correct: prev.correct }))
+  }
 
   return (
     <div className="flex flex-col items-center justify-center text-white text-center">
@@ -88,8 +94,8 @@ const LocationTrivia: React.FC = () => {
                     setSelectedAnswer(option);
                     handleAnswer(option); 
                   }
-                }
-              }>
+                }}
+              >
                 {option}
               </motion.button>
             ))}
@@ -116,7 +122,7 @@ const LocationTrivia: React.FC = () => {
                     <button onClick={() => setShowTrivia(true)} className="mt-2 px-4 py-1 bg-gray-500 rounded">Show Trivia</button>
                   )}
                   {showTrivia && <p>Trivia: {currentDestination.trivia[0]}</p>}
-                  <button onClick={() => loadNewQuestion()}
+                  <button onClick={() => loadNewQuestion(destinations, usedDestinations)}
                     className="mt-4 px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-lg font-semibold">
                     Next Question
                   </button>
@@ -126,7 +132,7 @@ const LocationTrivia: React.FC = () => {
                   <p className="text-red-400">😢 Incorrect!</p>
                   <p>Correct answer was: {currentDestination.city}</p>
                   <p>Trivia: {currentDestination.trivia[0]}</p>
-                  <button onClick={() => loadNewQuestion()}
+                  <button onClick={() => loadNewQuestion(destinations, usedDestinations)}
                     className="mt-4 px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-lg font-semibold">
                     Play Again
                   </button>
@@ -147,6 +153,7 @@ const LocationTrivia: React.FC = () => {
       )}
     </div>
   );
+
 };
 
 export default LocationTrivia;

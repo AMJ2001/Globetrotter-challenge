@@ -14,9 +14,17 @@ const UserComponent: React.FC<UserProps> = ({ setUserData }) => {
   const [isLoginMode, setIsLoginMode] = useState(true);
 
   const handleAuth = async () => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!regex.test(email)) {
+      window.alert("Please enter valid email");
+      return;
+    } else if (!password || password.length < 5) {
+      window.alert("Please enter a valid password longer than 4 characters");
+      return;
+    }
     const url = isLoginMode
-      ? "http://localhost:5000/api/login"
-      : "http://localhost:5000/api/register";
+      ? "https://globetrotter-challenge-production-c574.up.railway.app/api/login"
+      : "https://globetrotter-challenge-production-c574.up.railway.app/api/register";
 
     const payload = isLoginMode
       ? { email, password }
@@ -36,7 +44,7 @@ const UserComponent: React.FC<UserProps> = ({ setUserData }) => {
       setUserData(userData);
       window.location.href = "/";
     } else {
-      alert(data.error || "Authentication failed.");
+      alert(data.error || "Authentication failed. Please make sure you have entered correct credentials.");
     }
   };
 
@@ -113,8 +121,7 @@ const UserComponent: React.FC<UserProps> = ({ setUserData }) => {
             <button className="px-4 py-2 rounded-lg"
               onClick={() => {
                 handleAuth();
-              }}
-            >Submit</button>
+              }}>Submit</button>
           </div>
         </>
       )}
