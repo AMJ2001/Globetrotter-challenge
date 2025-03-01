@@ -7,7 +7,7 @@ export const getDestinations = async (req: Request, res: Response) => {
     res.json(destinations);
   } catch (error) {
     console.error("Error fetching destinations:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error", data: JSON.stringify(Error) });
   }
 };
 
