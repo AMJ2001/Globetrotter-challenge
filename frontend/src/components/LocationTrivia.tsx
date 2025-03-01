@@ -69,6 +69,7 @@ const LocationTrivia: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center text-white text-center">
+      { localStorage.getItem("targetScore") && (<h4>Active Challenge: Score more than {localStorage.getItem("targetScore")}</h4>) }
       {isCorrect && <Confetti />}
       {currentDestination ? (
         <>
