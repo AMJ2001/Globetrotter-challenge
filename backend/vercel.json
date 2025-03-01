@@ -19,5 +19,5 @@
       "destination": "/"
     }
   ],
-  "buildCommand": "tsc"
+  "buildCommand": "npm run build && tsc"
 }
