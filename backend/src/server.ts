@@ -1,9 +1,9 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
+import { getInviterProfile, inviteUser, loginUser, registerUser } from "./controllers/User";
 import { getDestinations, createDestination } from "./controllers/Destinations";
 import connectDB from "./config/MongoConfig";
-import { getInviterProfile, inviteUser, loginUser, registerUser } from "./controllers/User";
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
 
 dotenv.config();
 connectDB();
