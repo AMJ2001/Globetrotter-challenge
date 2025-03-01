@@ -23,17 +23,17 @@ const InviteProfile: React.FC = () => {
 
   return (
     <div className="p-4 rounded-lg bg-gray-700 text-white shadow-md text-center">
-      {error ? (
-        <p className="text-red-400">{error}</p>
-      ) : inviter ? (
+      {error 
+      ? (<p className="text-red-400">{error}</p>)
+      : inviter
+      ? (
         <>
           <p className="text-xl font-bold">You were invited by {inviter.name} 🎉</p>
           <p className="text-gray-300">Favourite Place: {inviter.favourite || "None"}</p>
           <p className="text-yellow-400 font-semibold">Score: {inviter.score || 0}</p>
         </>
-      ) : (
-        <p>Loading inviter's profile...</p>
-      )}
+      )
+      : (<p>Loading inviter's profile...</p>)}
 
       <button
         onClick={() => window.location.href = "/"}
