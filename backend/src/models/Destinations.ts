@@ -8,4 +8,4 @@ const DestinationSchema = new mongoose.Schema({
   trivia: { type: [String], required: true }
 });
 
-export default mongoose.model("destinations", DestinationSchema);
+export const DestinationModel = mongoose.model("destinations", DestinationSchema);

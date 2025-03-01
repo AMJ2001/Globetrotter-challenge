@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/globetrotter";
+const MONGO_URI = "mongodb://localhost:27017/globetrotter";
 
 const connectDB = async () => {
   try {
@@ -9,7 +9,7 @@ const connectDB = async () => {
       return;
     }
 
-    await mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/globetrotterDB");
+    await mongoose.connect(process.env.MONGO_URI || MONGO_URI);
 
     console.log("MongoDB Connected.");
   } catch (err) {

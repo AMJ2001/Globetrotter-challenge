@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import DestinationModel from "../models/Destinations";
+import { DestinationModel } from "../models/Destinations";
 
 export const getDestinations = async (req: Request, res: Response) => {
   try {
